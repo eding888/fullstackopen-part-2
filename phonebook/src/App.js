@@ -1,4 +1,7 @@
 import { useState } from 'react'
+import Filter from './components/Filter'
+import PersonForm from './components/PersonForm'
+import Persons from './components/Persons'
 
 const App = () => {
   const [persons, setPersons] = useState([
@@ -16,6 +19,17 @@ const App = () => {
   const updateText = (event, setFunction) => 
     setFunction(event.target.value);
 
+  const handleSearch = (event) => {
+    setSearch(event.target.value);
+    updateSearching(event);
+  }
+
+  const handleName = (event) =>
+    setNewName(event.target.value);
+
+  const handleNumber = (event) =>
+    setNewNumber(event.target.value);
+
   const updateSearching = (event) =>{
     if(event.target.value.length > 0) searching = true;
     else searching = false;
@@ -24,10 +38,11 @@ const App = () => {
     target = event.target.value;
     setSearchTarget(target);
   }
+  
+  
   const addPerson = (event) => {
     event.preventDefault();
     const nameExists = persons.reduce((exists, person) => person.name === newName, false);
-
     if(!nameExists){
       const newPerson = {
         name: newName,
@@ -37,49 +52,28 @@ const App = () => {
     }
     else alert(`${newName} is already in the phonebook.`)
   }
+
   const peopleToShow = searching ? persons.filter(person => person.name.toLowerCase().includes(target.toLowerCase())) : persons;
+  
   return (
     <div>
       <h2>Phonebook</h2>
-      <form>
-        <div>
-          filter shown with <input 
-            value = {search}
-            onChange = {event => {
-              updateText(event, setSearch);
-              updateSearching(event);
-            }}
-            />
-        </div>
-      </form>
+      <Filter 
+        searchValue= {search} 
+        searchEvent= {handleSearch}
+      />
       <h2>add a new</h2>
-      <form onSubmit = {addPerson}>
-        <div>
-          name: <input 
-            value = {newName}
-            onChange= {event => updateText(event, setNewName)}
-            required
-          />
-        </div>
-        <div>
-          number: <input
-            value = {newNumber}
-            onChange= {event => updateText(event, setNewNumber)}
-            pattern= "(\d{3}([\-]?)\d{3}([\-]?)\d{4})"
-            required
-          />
-        </div>
-        <div>
-          <button type="submit">add</button>
-        </div>
-      </form>
+      <PersonForm
+        nameValue= {newName}
+        numberValue= {newNumber}
+        nameEvent= {handleName}
+        numberEvent= {handleNumber}
+        submitEvent= {addPerson}
+      />
       <h2>Numbers</h2>
-      <div>
-        {peopleToShow.map(person =>
-          <div>
-            {person.name} {person.number}
-          </div>)}
-        </div>
+      <Persons
+        people={peopleToShow}
+      />
     </div>
   )
 }
