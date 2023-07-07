@@ -1,13 +1,12 @@
 import { useState } from 'react'
+import { useEffect } from 'react'
+import axios from 'axios'
 import Filter from './components/Filter'
 import PersonForm from './components/PersonForm'
 import Persons from './components/Persons'
 
 const App = () => {
-  const [persons, setPersons] = useState([
-    { name: 'Arto Hellas',
-      number: '704-423-3094' }
-  ]) 
+  const [persons, setPersons] = useState([]); 
   const [newName, setNewName] = useState('');
   const [newNumber, setNewNumber] = useState('');
   const [search, setSearch] = useState('');
@@ -15,6 +14,14 @@ const App = () => {
   const [searchTarget, setSearchTarget] = useState('');
   let searching = searchEnabled;
   let target = searchTarget;
+
+  useEffect(() => {
+    axios
+      .get("http://localhost:3001/persons")
+      .then(response => {
+        setPersons(response.data);
+      });
+  })
 
   const updateText = (event, setFunction) => 
     setFunction(event.target.value);
