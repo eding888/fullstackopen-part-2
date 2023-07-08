@@ -4,6 +4,7 @@ import axios from 'axios'
 import Filter from './components/Filter'
 import PersonForm from './components/PersonForm'
 import Persons from './components/Persons'
+import server from './services/serverActions'
 
 const App = () => {
   const [persons, setPersons] = useState([]); 
@@ -16,15 +17,13 @@ const App = () => {
   let target = searchTarget;
 
   useEffect(() => {
+    console.log("effect");
     axios
       .get("http://localhost:3001/persons")
       .then(response => {
         setPersons(response.data);
       });
-  })
-
-  const updateText = (event, setFunction) => 
-    setFunction(event.target.value);
+  }, [])
 
   const handleSearch = (event) => {
     setSearch(event.target.value);
@@ -49,13 +48,20 @@ const App = () => {
   
   const addPerson = (event) => {
     event.preventDefault();
-    const nameExists = persons.reduce((exists, person) => person.name === newName, false);
-    if(!nameExists){
+    const nameMatches = persons.reduce((matches, person) =>{
+      if(person.name === newName) return (matches + 1);
+      else return matches;
+    }, 0);
+
+    if(nameMatches === 0){
       const newPerson = {
         name: newName,
         number: newNumber,
       };
-      setPersons(persons.concat(newPerson));
+      server
+        .create(newPerson)
+        .then(createdPerson => setPersons(persons.concat(createdPerson)));
+      
     }
     else alert(`${newName} is already in the phonebook.`)
   }
