@@ -8,5 +8,9 @@ const create = newPerson => {
     const request = axios.post(dataURL, newPerson);
     return extractRequestData(request);
 }
+const remove = id => {
+    const request = axios.delete(`${dataURL}/${id}`);
+    return extractRequestData(request);
+}
 
-export default{ create };
+export default{ create, remove };

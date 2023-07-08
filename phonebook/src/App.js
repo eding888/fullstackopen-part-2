@@ -17,7 +17,7 @@ const App = () => {
   let target = searchTarget;
 
   useEffect(() => {
-    console.log("effect");
+    console.log("hi");
     axios
       .get("http://localhost:3001/persons")
       .then(response => {
@@ -57,6 +57,7 @@ const App = () => {
       const newPerson = {
         name: newName,
         number: newNumber,
+        id: new Date().getTime(),
       };
       server
         .create(newPerson)
@@ -66,6 +67,15 @@ const App = () => {
     else alert(`${newName} is already in the phonebook.`)
   }
 
+  const removePerson = (event, id) => {
+    event.preventDefault();
+    if(window.confirm(`Delete ${persons.find(person => person.id === id).name}?`)){
+      server
+        .remove(id)
+        .then(removedPerson => 
+          setPersons(persons.filter(person => person.id !== id)));
+    }
+  }
   const peopleToShow = searching ? persons.filter(person => person.name.toLowerCase().includes(target.toLowerCase())) : persons;
   
   return (
@@ -86,6 +96,7 @@ const App = () => {
       <h2>Numbers</h2>
       <Persons
         people={peopleToShow}
+        handleDeletion={removePerson}
       />
     </div>
   )
