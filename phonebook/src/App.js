@@ -48,23 +48,31 @@ const App = () => {
   
   const addPerson = (event) => {
     event.preventDefault();
-    const nameMatches = persons.reduce((matches, person) =>{
-      if(person.name === newName) return (matches + 1);
-      else return matches;
-    }, 0);
+    const nameMatch = persons.find(person => person.name === newName);
+    const newPerson = {
+      name: newName,
+      number: newNumber,
+      id: new Date().getTime(),
+    };
 
-    if(nameMatches === 0){
-      const newPerson = {
-        name: newName,
-        number: newNumber,
-        id: new Date().getTime(),
-      };
+    if(nameMatch === undefined){
       server
         .create(newPerson)
         .then(createdPerson => setPersons(persons.concat(createdPerson)));
-      
     }
-    else alert(`${newName} is already in the phonebook.`)
+    else{
+      if(nameMatch.number !== newNumber){
+        if(window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)){
+          const updatedItemID = nameMatch.id;
+          newPerson.id = updatedItemID;
+          console.log(updatedItemID);
+          server
+            .update(updatedItemID, newPerson)
+            .then(setPersons(persons.map(person => person.id === updatedItemID ? newPerson : person)));
+        }
+      }
+      else alert(`${newName} is already in the phonebook.`)
+    }
   }
 
   const removePerson = (event, id) => {

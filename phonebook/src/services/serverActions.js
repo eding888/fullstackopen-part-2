@@ -13,4 +13,8 @@ const remove = id => {
     return extractRequestData(request);
 }
 
-export default{ create, remove };
+const update = (id, newPerson) => {
+    const request = axios.put(`${dataURL}/${id}`, newPerson);
+    return extractRequestData(request);
+}
+export default{ create, remove, update };
