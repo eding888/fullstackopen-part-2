@@ -5,7 +5,7 @@ import Filter from './components/Filter'
 import PersonForm from './components/PersonForm'
 import Persons from './components/Persons'
 import server from './services/serverActions'
-
+import Notification from './components/Notification'
 const App = () => {
   const [persons, setPersons] = useState([]); 
   const [newName, setNewName] = useState('');
@@ -13,6 +13,7 @@ const App = () => {
   const [search, setSearch] = useState('');
   const [searchEnabled, setSearchEnabled] = useState(false);
   const [searchTarget, setSearchTarget] = useState('');
+  const [notificationMessage, setNotificationMessage] = useState('');
   let searching = searchEnabled;
   let target = searchTarget;
 
@@ -23,8 +24,15 @@ const App = () => {
       .then(response => {
         setPersons(response.data);
       });
-  }, [])
+    }, [])
 
+  const updateNotification = (message) => {
+    setNotificationMessage(message);
+    setTimeout(
+      () => { setNotificationMessage('') },
+      5000
+    )
+  }
   const handleSearch = (event) => {
     setSearch(event.target.value);
     updateSearching(event);
@@ -59,6 +67,7 @@ const App = () => {
       server
         .create(newPerson)
         .then(createdPerson => setPersons(persons.concat(createdPerson)));
+      updateNotification("Person created successfully.");
     }
     else{
       if(nameMatch.number !== newNumber){
@@ -68,7 +77,8 @@ const App = () => {
           console.log(updatedItemID);
           server
             .update(updatedItemID, newPerson)
-            .then(setPersons(persons.map(person => person.id === updatedItemID ? newPerson : person)));
+            .then(updatedPerson => setPersons(persons.map(person => person.id === updatedPerson.id ? newPerson : person)));
+            updateNotification("Person updated successfully.");
         }
       }
       else alert(`${newName} is already in the phonebook.`)
@@ -82,6 +92,7 @@ const App = () => {
         .remove(id)
         .then(removedPerson => 
           setPersons(persons.filter(person => person.id !== id)));
+        updateNotification("Person removed successfully.");
     }
   }
   const peopleToShow = searching ? persons.filter(person => person.name.toLowerCase().includes(target.toLowerCase())) : persons;
@@ -89,6 +100,9 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification
+        message= {notificationMessage}
+      />
       <Filter 
         searchValue= {search} 
         searchEvent= {handleSearch}
