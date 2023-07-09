@@ -14,6 +14,20 @@ const App = () => {
   const [searchEnabled, setSearchEnabled] = useState(false);
   const [searchTarget, setSearchTarget] = useState('');
   const [notificationMessage, setNotificationMessage] = useState('');
+  const [notificationStyle, setNotificationStyle] = useState({
+    backgroundColor: "silver",
+    color: "lime",
+    borderRadius: 5,
+    border: "5px solid",
+    borderColor: "lime",
+    fontSize: "2rem",
+    padding: "1rem",
+  })
+  const messageType = {
+    GOOD: "good",
+    BAD: "bad",
+  }
+
   let searching = searchEnabled;
   let target = searchTarget;
 
@@ -26,7 +40,17 @@ const App = () => {
       });
     }, [])
 
-  const updateNotification = (message) => {
+  const updateNotification = (message, type) => {
+    let notificationStyleTemp = {...notificationStyle}
+    switch(type){
+      case "good":
+        notificationStyleTemp.color = notificationStyleTemp.borderColor = "lime";
+        break;
+      case "bad":
+        notificationStyleTemp.color = notificationStyleTemp.borderColor = "red";
+        break;
+    }
+    setNotificationStyle(notificationStyleTemp);
     setNotificationMessage(message);
     setTimeout(
       () => { setNotificationMessage('') },
@@ -67,7 +91,7 @@ const App = () => {
       server
         .create(newPerson)
         .then(createdPerson => setPersons(persons.concat(createdPerson)));
-      updateNotification("Person created successfully.");
+      updateNotification("Person created successfully.", messageType.GOOD);
     }
     else{
       if(nameMatch.number !== newNumber){
@@ -77,8 +101,10 @@ const App = () => {
           console.log(updatedItemID);
           server
             .update(updatedItemID, newPerson)
-            .then(updatedPerson => setPersons(persons.map(person => person.id === updatedPerson.id ? newPerson : person)));
-            updateNotification("Person updated successfully.");
+            .then(updatedPerson => setPersons(persons.map(person => person.id === updatedPerson.id ? newPerson : person)))
+            .catch(error => updateNotification(`Information of ${newName} has already been removed from the server.`, messageType.BAD)); 
+            updateNotification("Person updated successfully.", messageType.GOOD);
+            
         }
       }
       else alert(`${newName} is already in the phonebook.`)
@@ -92,7 +118,7 @@ const App = () => {
         .remove(id)
         .then(removedPerson => 
           setPersons(persons.filter(person => person.id !== id)));
-        updateNotification("Person removed successfully.");
+        updateNotification("Person removed successfully.", messageType.GOOD);
     }
   }
   const peopleToShow = searching ? persons.filter(person => person.name.toLowerCase().includes(target.toLowerCase())) : persons;
@@ -102,6 +128,7 @@ const App = () => {
       <h2>Phonebook</h2>
       <Notification
         message= {notificationMessage}
+        style = {notificationStyle}
       />
       <Filter 
         searchValue= {search} 
